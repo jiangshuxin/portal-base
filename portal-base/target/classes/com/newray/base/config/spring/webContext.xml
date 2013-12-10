@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+		http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+<!-- Spring Web MVC Config Begin -->
+	<context:component-scan base-package="com.newray.**.controller" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+	  <property name="mediaTypes">
+	    <map>
+	      <entry key="atom" value="application/atom+xml"/>
+	      <entry key="html" value="text/html"/>
+	      <entry key="json" value="application/json"/>
+	    </map>
+	  </property>
+	  <property name="defaultContentType" value="text/html" />
+	  <property name="viewResolvers">
+	    <list>
+	      <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+	      <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	      	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+	        <property name="prefix" value="/WEB-INF/jsp/"/>
+	        <property name="suffix" value=".jsp"/>
+	      </bean>
+	    </list>
+	  </property>
+	  <property name="defaultViews">
+	    <list>
+	      <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+	    </list>
+	  </property>
+	</bean>
+
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**/*form.htm"/>
+			<bean class="com.newray.base.spring.web.interceptor.FormCheckInterceptor" ></bean>
+		</mvc:interceptor>
+		<!-- <mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<bean class="com.newray.base.spring.web.interceptor.SessionCheckInterceptor" ></bean>
+		</mvc:interceptor> -->
+	</mvc:interceptors>
+	
+	<mvc:annotation-driven></mvc:annotation-driven>
+
+<!-- Spring Web MVC Config End -->
+
+
+<!-- My Web App Config Begin -->
+
+<!-- MVC list/info Router Begin -->
+	<bean class="com.newray.base.web.router.MVCRouterService">
+		<property name="router">
+			<map>
+				<entry key="/demoList.htm" value-ref="userListPage1"></entry>
+				<entry key="/demoDir/subDemoList.htm" value-ref="userListPage2"></entry>
+				<entry key="/user" value-ref="userInfoPage"></entry>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="userListPage1" class="com.newray.base.web.router.MVCRouter">
+		<property name="modelClass" value="com.newray.base.demo.model.TUserinfo"></property>
+		<property name="listPageCommand">
+			<bean class="com.newray.base.web.command.ListPageCommand">
+				<property name="queryCommand">
+					<list>
+						<bean class="com.newray.base.web.command.QueryCommand">
+							<property name="fieldName" value="password"></property>
+							<property name="operation" value="notEqual"></property>
+							<property name="queryText1" value="20sf"></property>
+							<property name="orderBy" value="true"></property>
+							<property name="orderDirection" value="asc"></property>
+						</bean>
+						<bean class="com.newray.base.web.command.QueryCommand">
+							<property name="fieldName" value="address"></property>
+							<property name="operation" value="notEqual"></property>
+							<property name="queryText1" value="20sf"></property>
+							<property name="orderBy" value="true"></property>
+							<property name="orderDirection" value="asc"></property>
+						</bean>
+					</list>
+				</property>
+			</bean>
+		</property>
+		<!-- <property name="jspPath" value="demolist"></property> 如果本项不指定，则使用对应entry的key作为jsp的默认路径，如/a/b/c.htm 到${prefix}/a/b/c.jsp -->
+	</bean>
+	
+	
+	<bean id="userListPage2" class="com.newray.base.web.router.MVCRouter">
+		<property name="modelClass" value="com.newray.base.demo.model.TUserinfo"></property>
+		<property name="jspPath" value="/demoDir/subDemoList"></property>
+	</bean>
+	<bean id="userInfoPage" class="com.newray.base.web.router.MVCRouter">
+		<property name="modelClass" value="com.newray.base.demo.model.TUserinfo"></property>
+		<property name="jspPath" value="demoinfo"></property>
+	</bean>
+<!-- MVC list Router End -->
+
+<!-- list查询功能 Begin -->
+	<bean id="list_oper_between" class="com.newray.base.web.list.search.impl.BetweenOper"></bean>
+	<bean id="list_oper_equal" class="com.newray.base.web.list.search.impl.EqualOper"></bean>
+	<bean id="list_oper_greaterorequal" class="com.newray.base.web.list.search.impl.GreaterOrEqualOper"></bean>
+	<bean id="list_oper_greaterthan" class="com.newray.base.web.list.search.impl.GreaterThanOper"></bean>
+	<bean id="list_oper_lessorequal" class="com.newray.base.web.list.search.impl.LessOrEqualOper"></bean>
+	<bean id="list_oper_lessthan" class="com.newray.base.web.list.search.impl.LessThanOper"></bean>
+	<bean id="list_oper_like" class="com.newray.base.web.list.search.impl.LikeOper"></bean>
+	<bean id="list_oper_notequal" class="com.newray.base.web.list.search.impl.NotEqualOper"></bean>
+
+	<bean class="com.newray.base.web.list.search.impl.LogicOperFacadeImpl">
+		<property name="logicOperMap">
+			<map>
+				<entry key="equal" value-ref="list_oper_equal"/>
+				<entry key="notEqual" value-ref="list_oper_notequal"/>
+				<entry key="like" value-ref="list_oper_like"/>
+				<entry key="gt" value-ref="list_oper_greaterthan"/>
+				<entry key="gte" value-ref="list_oper_greaterorequal"/>
+				<entry key="lt" value-ref="list_oper_lessthan"/>
+				<entry key="lte" value-ref="list_oper_lessorequal"/>
+				<entry key="between" value-ref="list_oper_between"/>
+			</map>
+		</property>
+	</bean>
+<!-- list查询功能 End -->
+
+<!-- My Web App Config End -->
+</beans>

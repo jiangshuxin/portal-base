@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE sqlMap         
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"         
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="merchantSalesAmt">
+
+	<typeAlias alias="merchantSalesAmt"
+		type="com.bill99.cps.rat.dal.report.model.MerchantSalesAmt" />
+	<typeAlias alias="queryMerchantSalesAmtCond"
+		type="com.bill99.cps.rat.dal.report.dao.QueryMerchantSalesAmtCond" />	
+
+	<select id="queryByCondition" parameterClass="queryMerchantSalesAmtCond"
+		resultClass="merchantSalesAmt">
+    <![CDATA[
+   select tacl.corp_name_cn as corporateClient,
+       tacl.s_card_no as cardNo ,
+       tacl.air_merch_name as merchant,
+       sum(decode(tacl.dr_cr, 'D', tacl.sales_amt, 'C', -tacl.sales_amt, 0)) as salesAmt  
+ 		 from t_ae_clr_list tacl 
+		          ]]>
+		<dynamic prepend="where">
+			<![CDATA[ 
+		              to_char (tacl.crt_time,'yyyymmdd') >= to_char (#beginDate#,'yyyymmdd') 
+				  and to_char (tacl.crt_time,'yyyymmdd') <= to_char (#endDate#,'yyyymmdd')	
+				  and tacl.s_card_no = #cardNo# 
+				]]>
+		</dynamic>
+		      <![CDATA[ 
+	group by tacl.s_card_no, tacl.air_merch_name, tacl.corp_name_cn 
+ 	order by corp_name_cn,s_card_no,salesAmt desc
+    ]]>
+	</select>
+	
+	
+</sqlMap> 

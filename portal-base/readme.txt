@@ -1,0 +1,2 @@
+1.设置Eclipse使用utf-8为默认编码
+2.项目中tempLib是临时jar包存放，日后建立maven私服时可以去掉
